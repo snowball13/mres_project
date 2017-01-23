@@ -1,13 +1,14 @@
-# Python script to run firedrake for a simple example of the Helmoltz eqn:
-# -grad^2(u) + u = f on Omega, with BC grad(u).n = 0 on Gamma (boundry)
+""" Python script to run firedrake for a simple example of the Helmoltz eqn:
+    -grad^2(u) + u = f on Omega, with BC grad(u).n = 0 on Gamma (boundry)
 
-# In weak form, this is (for suitable function space V):
-# integral(grad(u).grad(v) + uv) = integral(fv)
-# where v is any test function in V.
+In weak form, this is (for suitable function space V):
+integral(grad(u).grad(v) + uv) = integral(fv)
+where v is any test function in V.
 
-# Here, we consider in 2D with f = (1.0 + 8.0pi^2)cos(2pix)cos(2piy)
+Here, we consider in 2D with f = (1.0 + 8.0pi^2)cos(2pix)cos(2piy)
 
-# Note the analytic solution is u(x,y) = cos(2pix)cos(2piy)
+Note the analytic solution is u(x,y) = cos(2pix)cos(2piy)
+"""
 
 
 from firedrake import *
