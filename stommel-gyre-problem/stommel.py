@@ -23,7 +23,7 @@ beta = 2e-11
 
 # We also need a function space V over which to solve the problem
 # We will use pw linear functions between elements
-V = FunctionSpace(mesh, "Lagrange", 1)
+V = FunctionSpace(mesh, "CG", 2)
 
 # Test and "trial" functions
 phi = TestFunction(V)
@@ -46,7 +46,7 @@ bc = DirichletBC(V, 0, 'on_boundary')
 solve(c == L, psi, bcs=[bc])
 
 # Output to file
-File("stommel.pvd").write(psi)
+File("stommelStream.pvd").write(psi)
 
 # Plot stream function psi
 try:
@@ -55,7 +55,40 @@ except:
     warning("Matplotlib not imported")
 
 try:
-    plot(psi, contour=True)
+    plot(psi)
+    plt.show()
+except Exception as e:
+    warning("Cannot plot, error msg: '%s'" % e.message)
+
+#----
+# Now, we compute the velocity field, u=(u,v)
+# where u=-psi_y, v=psi_x (partial derivatives)
+# We treat this as a simple finite element problem
+
+# Define the vector space over which to solve
+V = VectorFunctionSpace(mesh, "CG", 1)
+
+# Test and trial functions
+u = TrialFunction(V)
+v = TestFunction(V)
+
+# Define the RHS of our problem. This is gradperp(psi).
+gradperp = lambda u: as_vector((-u.dx(1), u.dx(0)))
+f = Function(V)
+f.interpolate(gradperp(psi))
+
+# Bilinear and linear forms
+c = (dot(v, u)) * dx
+L = (dot(v, f)) * dx
+
+# Solve and output
+u = Function(V)
+solve(c == L, u)
+File("stommelVel.pvd").write(u)
+
+# Plot velocity field
+try:
+    plot(u)
     plt.show()
 except Exception as e:
     warning("Cannot plot, error msg: '%s'" % e.message)
