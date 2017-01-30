@@ -101,10 +101,17 @@ def stommel_grid(xdim=200, ydim=200):
             xi = lon[i] / a
             yi = lat[j] / b
             if (psi.at([xi, yi], dont_raise=True) is None):
-                print i, j, xi, yi
-            P[i, j, :] = psi.at([xi, yi], dont_raise=True) if u.at([xi, yi], dont_raise=True) is not None else 0.
-            U[i, j, :] = u.at([xi, yi], dont_raise=True)[0] if u.at([xi, yi], dont_raise=True) is not None else 0.
-            V[i, j, :] = u.at([xi, yi], dont_raise=True)[1] if u.at([xi, yi], dont_raise=True) is not None else 0.
+                print "Attempting to evaluate psi outside its domain - coords: ", xi, yi
+                P[i, j, :] = 0.
+            else:
+                P[i, j, :] = psi.at([xi, yi])
+            if (u.at([xi, yi], dont_raise=True) is None):
+                print "Attempting to evaluate u outside its domain - coords: ", xi, yi
+                U[i, j, :] = 0.
+                V[i, j, :] = 0.
+            else:
+                U[i, j, :] = u.at([xi, yi])[0]
+                V[i, j, :] = u.at([xi, yi])[1]
 
     return Grid.from_data(U, lon, lat, V, lon, lat, depth, time, field_data={'P': P}, mesh='flat')
 
