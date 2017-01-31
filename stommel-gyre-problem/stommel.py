@@ -1,4 +1,4 @@
-from parcels import Grid, ParticleSet, ScipyParticle, JITParticle, Variable
+from parcels import FiredrakeGrid, ParticleSet, ScipyParticle, JITParticle, Variable
 from parcels import AdvectionRK4, AdvectionEE, AdvectionRK45
 from argparse import ArgumentParser
 import numpy as np
@@ -48,7 +48,7 @@ def stommel_grid(xdim=200, ydim=200):
     L = f * phi * dx
 
     # Redefine psi to hold the solution
-    psi = Function(V)
+    psi = Function(V, name="psi")
 
     # We can now solve the equation...
     bc = DirichletBC(V, 0, 'on_boundary')
@@ -78,54 +78,25 @@ def stommel_grid(xdim=200, ydim=200):
     u = Function(V)
     solve(c == L, u)
 
-    #----
     # We now create the PARCELS grid, and use point evaluation to gain values
     # for the stream function and velocities at points in the domain
-
-    # Set NEMO grid variables
-    depth = np.zeros(1, dtype=np.float32)
-    time = np.linspace(0., 100000. * 86400., 2, dtype=np.float64)
 
     # Coordinates of the test grid (on A-grid in deg)
     lon = np.linspace(0, a, xdim, dtype=np.float32)
     lat = np.linspace(0, b, ydim, dtype=np.float32)
-
-    # Define arrays U (zonal), V (meridional), and P (sea surface height)
-    # all on A-grid. U, V will be the velocities, P the stream function.
-    U = np.zeros((lon.size, lat.size, time.size), dtype=np.float32)
-    V = np.zeros((lon.size, lat.size, time.size), dtype=np.float32)
-    P = np.zeros((lon.size, lat.size, time.size), dtype=np.float32)
-
-    for i in range(lon.size):
-        for j in range(lat.size):
-            xi = lon[i] / a
-            yi = lat[j] / b
-            if (psi.at([xi, yi], dont_raise=True) is None):
-                print "Attempting to evaluate psi outside its domain - coords: ", xi, yi
-                P[i, j, :] = 0.
-            else:
-                P[i, j, :] = psi.at([xi, yi])
-            if (u.at([xi, yi], dont_raise=True) is None):
-                print "Attempting to evaluate u outside its domain - coords: ", xi, yi
-                U[i, j, :] = 0.
-                V[i, j, :] = 0.
-            else:
-                U[i, j, :] = u.at([xi, yi])[0]
-                V[i, j, :] = u.at([xi, yi])[1]
-
-    return Grid.from_data(U, lon, lat, V, lon, lat, depth, time, field_data={'P': P}, mesh='flat')
+    return FiredrakeGrid(u, lon, lat, fields=[psi])
 
 
 def UpdateP(particle, grid, time, dt):
-    particle.p = grid.P[time, particle.lon, particle.lat]
+    particle.p = grid.psi.eval(time, particle.lon, particle.lat)
 
 
 def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
 
     grid = stommel_grid()
-    grid.P.show()
-    filename = 'stommel'
-    grid.write(filename)
+    # grid.P.show()
+    # filename = 'stommel'
+    # grid.write(filename)
 
     # Determine particle class according to mode
     ParticleClass = JITParticle if mode == 'jit' else ScipyParticle
@@ -135,9 +106,9 @@ def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
         p_start = Variable('p_start', dtype=np.float32, initial=0.)
 
     pset = ParticleSet.from_line(grid, size=npart, pclass=MyParticle,
-                                 start=(100, 5000), finish=(200, 5000))
+                                 start=(0.01, 0.5), finish=(0.02, 0.5))
     for particle in pset:
-        particle.p_start = grid.P[0., particle.lon, particle.lat]
+        particle.p_start = grid.psi.eval(0., particle.lon, particle.lat)
 
     if verbose:
         print("Initial particle positions:\n%s" % pset)
