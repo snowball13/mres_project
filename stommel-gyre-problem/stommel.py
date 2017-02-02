@@ -5,7 +5,8 @@ import numpy as np
 import math
 import pytest
 from datetime import timedelta as delta
-
+import inspect
+from ast import parse, FunctionDef, Module
 from firedrake import *
 
 ptype = {'scipy': ScipyParticle, 'jit': JITParticle}
