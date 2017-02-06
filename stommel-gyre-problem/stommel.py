@@ -5,8 +5,6 @@ import numpy as np
 import math
 import pytest
 from datetime import timedelta as delta
-import inspect
-from ast import parse, FunctionDef, Module
 from firedrake import *
 
 ptype = {'scipy': ScipyParticle, 'jit': JITParticle}
@@ -91,7 +89,6 @@ def stommel_grid(xdim=200, ydim=200):
 def UpdateP(particle, grid, time, dt):
     particle.p = grid.psi.eval(time, particle.lon, particle.lat)
 
-
 def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
 
     grid = stommel_grid()
@@ -119,6 +116,7 @@ def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
     dt = delta(minutes=5)
     interval = delta(hours=12)
     print("Stommel: Advecting %d particles for %s" % (npart, runtime))
+    import ipdb; ipdb.set_trace()
     pset.execute(method + pset.Kernel(UpdateP), runtime=runtime, dt=dt, interval=interval,
                  output_file=pset.ParticleFile(name="StommelParticle"), show_movie=True)
 
