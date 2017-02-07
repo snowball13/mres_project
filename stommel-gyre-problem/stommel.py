@@ -1,5 +1,6 @@
 from parcels import FiredrakeGrid, ParticleSet, ScipyParticle, JITParticle, Variable
 from parcels import AdvectionRK4, AdvectionEE, AdvectionRK45
+from scripts import plotTrajectoriesFile
 from argparse import ArgumentParser
 import numpy as np
 import math
@@ -152,6 +153,8 @@ Example of particle advection in the steady-state solution of the Stommel equati
 
     pset = stommel_example(args.particles, mode=args.mode,
                     verbose=args.verbose, method=method[args.method])
+
+    plotTrajectoriesFile('StommelParticle.nc')
 
     #pset.show()
     raw_input("Press Enter to continue...")
