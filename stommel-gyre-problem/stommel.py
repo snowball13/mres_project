@@ -40,7 +40,7 @@ def stommel_grid(xdim=200, ydim=200):
     # Declare and define f (the RHS of the eqn), a function over V
     # When using interpolate(), we just pass the analytic expression.
     f = Function(V)
-    f.interpolate(Expression("-sin(pi*x[1])/100"))
+    f.interpolate(Expression("-sin(pi*x[1])/10000"))
 
     # Define the integrands of the weak form (bilinear and linear forms resp.)
     c = (-eps * dot(grad(phi), grad(psi)) + phi * grad(psi)[0]) * dx
