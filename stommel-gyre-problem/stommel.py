@@ -116,9 +116,8 @@ def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
     dt = delta(minutes=5)
     interval = delta(hours=12)
     print("Stommel: Advecting %d particles for %s" % (npart, runtime))
-    import ipdb; ipdb.set_trace()
     pset.execute(method + pset.Kernel(UpdateP), runtime=runtime, dt=dt, interval=interval,
-                 output_file=pset.ParticleFile(name="StommelParticle"), show_movie=True)
+                 output_file=pset.ParticleFile(name="StommelParticle"), show_movie=False)
 
     if verbose:
         print("Final particle positions:\n%s" % pset)
@@ -141,7 +140,7 @@ def test_stommel_grid(mode):
 if __name__ == "__main__":
     p = ArgumentParser(description="""
 Example of particle advection in the steady-state solution of the Stommel equation""")
-    p.add_argument('mode', choices=('scipy', 'jit'), nargs='?', default='jit',
+    p.add_argument('mode', choices=('scipy', 'jit'), nargs='?', default='scipy',
                    help='Execution mode for performing computation')
     p.add_argument('-p', '--particles', type=int, default=1,
                    help='Number of particles to advect')
@@ -154,5 +153,5 @@ Example of particle advection in the steady-state solution of the Stommel equati
     pset = stommel_example(args.particles, mode=args.mode,
                     verbose=args.verbose, method=method[args.method])
 
-    pset.show()
+    #pset.show()
     raw_input("Press Enter to continue...")
