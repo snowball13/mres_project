@@ -26,8 +26,8 @@ def stommel_grid(xdim=200, ydim=200):
     # velocities on our mesh
 
     eps = 0.05
-    a = 10000
-    b = 10000
+    a = 1
+    b = 1
     mesh = UnitSquareMesh(xdim, ydim)
 
     # We need a function space V over which to solve the problem
@@ -44,7 +44,7 @@ def stommel_grid(xdim=200, ydim=200):
     f.interpolate(Expression("-sin(pi*x[1])/10000"))
 
     # Define the integrands of the weak form (bilinear and linear forms resp.)
-    c = (-eps * dot(grad(phi), grad(psi)) + phi * grad(psi)[0]) * dx
+    c = (-eps * dot(grad(phi), grad(psi)) + phi * grad(psi)[0] / a) * dx
     L = f * phi * dx
 
     # Redefine psi to hold the solution
@@ -113,12 +113,12 @@ def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
         print("Initial particle positions:\n%s" % pset)
 
     # Execute for 50 days, with 5min timesteps and hourly output
-    runtime = delta(days=50)
-    dt = delta(minutes=5)
-    interval = delta(hours=12)
+    runtime = delta(days=0.50)
+    dt = delta(minutes=0.5)
+    interval = delta(hours=0.12)
     print("Stommel: Advecting %d particles for %s" % (npart, runtime))
     pset.execute(method + pset.Kernel(UpdateP), runtime=runtime, dt=dt, interval=interval,
-                 output_file=pset.ParticleFile(name="StommelParticle"), show_movie=False)
+                 output_file=pset.ParticleFile(name="StommelParticle"), show_movie=True)
 
     if verbose:
         print("Final particle positions:\n%s" % pset)
@@ -151,10 +151,10 @@ Example of particle advection in the steady-state solution of the Stommel equati
                    help='Numerical method used for advection')
     args = p.parse_args()
 
-    pset = stommel_example(args.particles, mode=args.mode,
-                    verbose=args.verbose, method=method[args.method])
+    pset = stommel_example(args.particles, mode='scipy',
+                    verbose=True, method=method[args.method])
 
-    plotTrajectoriesFile('StommelParticle.nc')
+    #plotTrajectoriesFile('StommelParticle.nc')
 
-    #pset.show()
+    pset.show()
     raw_input("Press Enter to continue...")
