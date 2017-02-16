@@ -154,7 +154,7 @@ Example of particle advection in the steady-state solution of the Stommel equati
     pset = stommel_example(args.particles, mode='scipy',
                     verbose=True, method=method[args.method])
 
-    #plotTrajectoriesFile('StommelParticle.nc')
+    plotTrajectoriesFile('StommelParticle.nc')
 
     pset.show()
     raw_input("Press Enter to continue...")
