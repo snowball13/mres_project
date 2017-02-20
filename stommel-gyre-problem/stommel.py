@@ -93,9 +93,6 @@ def UpdateP(particle, grid, time, dt):
 def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
 
     grid = stommel_grid()
-    # grid.P.show()
-    # filename = 'stommel'
-    # grid.write(filename)
 
     # Determine particle class according to mode
     ParticleClass = JITParticle if mode == 'jit' else ScipyParticle
@@ -118,7 +115,7 @@ def stommel_example(npart=1, mode='jit', verbose=False, method=AdvectionRK4):
     interval = delta(hours=0.12)
     print("Stommel: Advecting %d particles for %s" % (npart, runtime))
     pset.execute(method + pset.Kernel(UpdateP), runtime=runtime, dt=dt, interval=interval,
-                 output_file=pset.ParticleFile(name="StommelParticle"), show_movie=True)
+                 output_file=pset.ParticleFile(name="StommelParticle"), show_movie=False)
 
     if verbose:
         print("Final particle positions:\n%s" % pset)
@@ -156,5 +153,5 @@ Example of particle advection in the steady-state solution of the Stommel equati
 
     #plotTrajectoriesFile('StommelParticle.nc')
 
-    pset.show()
+    pset.show(field=pset.grid.psi)
     raw_input("Press Enter to continue...")
